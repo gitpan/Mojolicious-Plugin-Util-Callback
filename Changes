@@ -1,0 +1,3 @@
+0.01 2013-03-03
+        - Added establishment of multiple callbacks.
+        - Separation from Sojolicious.

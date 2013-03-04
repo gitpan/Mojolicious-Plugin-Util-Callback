@@ -1,7 +1,7 @@
 package Mojolicious::Plugin::Util::Callback;
 use Mojo::Base 'Mojolicious::Plugin';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my %callback;
 
@@ -61,10 +61,10 @@ sub register {
 	$callback{$name} = [$cb, $once];
       }
 
-      # Call callback
+      # Release callback
       else {
 
-	# Call existing callback
+	# Release existing callback
 	return $callback{$name}->[0]->($c, @_) if exists $callback{$name};
 
 	# Return nothing
@@ -109,16 +109,15 @@ Mojolicious::Plugin::Util::Callback - Reverse helpers for Mojolicious
 
 =head1 DESCRIPTION
 
-Callbacks are similar to helpers, with a slightly
-different semantic.
+Callbacks are similar to helpers, with slightly
+different semantics.
 While helpers are usually established by plugins
 and called by controllers, callbacks are
 usually called by plugins and established
-by other plugins or on registration of other plugins
-in the application.
+by other plugins or inside the main application.
 
-A typical usecase is the database agnostic
-access to data via plugins.
+A typical usecase for callbacks is the database
+agnostic access to data via plugins.
 
 
 =head1 HELPERS
@@ -130,41 +129,80 @@ access to data via plugins.
     get_cached_profile => 'Akron'
   );
 
-  # Establish callback
+  # Establish a single callback
   $self->callback(get_cached_profile => sub {
     my ($c, $name) = @_;
     return $c->cache->get( $name );
   });
 
-  # Define multiple callbacks ...
-  my $param = {
-    my_callback_1 => sub { 'Yeah!' },
-    my_callback_2 => sub { 'Fine!' }
-  };
+Establish or release a callback.
+To release a callback, just pass the unique name of the
+callback and all necessary parameters to the helper.
+To establish a callback, pass the unique name of the
+callback and a code reference to the helper.
+This code reference will be invoked each time the
+callback is released, and all parameters will be passed,
+prepended by the controller object.
 
-  # ... and establish them, e.g. when registering a plugin
-  $self->callback(
-    [qw/my_callback_1 my_callback_2/] => $param, -once
-  );
+An additional C<-once> flag when establishing single or
+multiple callbacks (see the example below) indicates,
+that the callbacks are not allowed to be redefined later.
 
-Establish or call a callback.
-To call a callback, just pass the name and all parameters
-to the helper.
-To establish a callback, pass the name and a code reference
-to release to the helper. The arguments of the callback
-function will be the controller object followed by all
-passed parameters from the call.
+If there is no callback defined for a certain name,
+C<undef> is returned on releasing.
+
 To establish multiple callbacks, e.g. at the start of the
 registration routine of a plugin, pass an array reference
 of callback names followed by a hash reference containing
 the callbacks to the helper. All callback references will
 be deleted from the hash, while the rest will stay intact.
 
-An additional C<-once> flag when establishing indicates,
-that the callbacks are not allowed to be redefined later.
+  # Inside 'MyUserPlugin'
+  sub register {
+    my ($self, $app, $param) = @_;
 
-If there is no callback defined for a certain name,
-C<undef> is returned on calling.
+    # Establish Util::Callback plugin
+    $app->plugin('Util::Callback');
+
+    # Accept callbacks defined by parameter
+    $app->callback(
+      ['get_cached_profile','get_db_profile'] => $param, -once
+    );
+
+    # Establish database agnostic 'fetch_profile' helper
+    $app->helper(
+      fetch_profile => sub {
+        my $c = shift;
+        my $user_name = shift;
+
+        # Return profile from cache or from db, if cache fails,
+        #   either because no cache callback is established or
+        #   the user is not in cache.
+        return
+          $c->callback(get_cache_profile => $user_name) ||
+          $c->callback(get_db_profile => $user_name);
+      }
+    );
+  };
+
+  # In a Mojolicious::Lite app
+  plugin MyUserPlugin => {
+    get_db_profile => sub {
+      my ($c, $name) = @_;
+      return $c->db->load( $name );
+    }
+  };
+
+  # In another plugin (e.g. for caching) or later in the application
+  $app->callback(
+    get_cached_profile => sub {
+      my ($c, $name) = @_;
+      return $c->cache->get( $name );
+    }
+  );
+
+  # In controller, app or template
+  my $profile = $c->fetch_profile('Akron');
 
 
 =head1 AVAILABILITY

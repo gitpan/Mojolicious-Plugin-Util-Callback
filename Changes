@@ -1,3 +1,6 @@
+0.02 2013-03-04
+        - Improved docs by creating an example.
+
 0.01 2013-03-03
         - Added establishment of multiple callbacks.
         - Separation from Sojolicious.

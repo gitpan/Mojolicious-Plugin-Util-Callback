@@ -1,3 +1,9 @@
+0.03 2013-05-20
+        - Makes it possible to set '-once'
+          as a signature on initialization.
+	- Improved test suite.
+	- Fixed warnings in perl-5.18.0.
+
 0.02 2013-03-04
         - Improved docs by creating an example.
 

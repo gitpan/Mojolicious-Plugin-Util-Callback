@@ -36,6 +36,10 @@ sub register {
     ['test_cb_2', 'test_cb_3'] => $param
   );
 
+  $mojo->callback(
+    ['test_cb_4'] => $param, -once
+  );
+
   $mojo->helper(
     test_helper_3 => sub {
       return shift->callback('test_cb_2');
@@ -51,7 +55,7 @@ sub register {
 package main;
 use Mojolicious::Lite;
 
-use lib '../../lib';
+use lib '../lib';
 
 use Test::More;
 use Test::Mojo;
@@ -73,9 +77,15 @@ $app->plugin(TestForCallback2 => {
   }
 });
 
+ok($app->callback('test_cb_4' => sub { 'Fine' }), 'Establish callback');
+
 is($app->test_helper_3, 'yeah 2', 'TestHelper works');
 is($app->test_helper_4, 'Hi! + yeah 3', 'TestHelper works');
 ok($app->callback(test_cb_3 => sub { shift->test_helper_2 . ' + yeah 4' }), 'Redefine test helper');
 is($app->test_helper_4, 'yeah + yeah 4', 'TestHelper works');
+
+is($app->callback('test_cb_4'), 'Fine', 'Establish callback');
+
+ok(!$app->callback('test_cb_4' => sub { 'Not fine!' }), 'Establish callback');
 
 done_testing;

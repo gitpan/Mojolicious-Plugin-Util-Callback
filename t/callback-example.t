@@ -72,7 +72,7 @@ get '/Change' => sub {
     my $title = shift;
     my @array = split(/\s+/, $title);
     foreach (@array) {
-      $_ = ucfirst $_ unless $_ ~~ [qw/a is/];
+      $_ = ucfirst $_ unless $_ eq 'a' || $_ eq 'is';
     };
     return join ' ', @array;
   });

@@ -7,7 +7,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
   NAME         => 'Mojolicious::Plugin::Util::Callback',
   AUTHOR       => 'Nils Diewald',
-  ABSTRACT     => 'Reverse helpers for Mojolicious',
+  ABSTRACT     => 'Reverse Helpers for Mojolicious',
   VERSION_FROM => 'lib/Mojolicious/Plugin/Util/Callback.pm',
   BUILD_REQUIRES => {
     'Test::More' => 0

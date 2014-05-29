@@ -1,7 +1,7 @@
 package Mojolicious::Plugin::Util::Callback;
 use Mojo::Base 'Mojolicious::Plugin';
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my %callback;
 
@@ -240,9 +240,9 @@ L<Mojolicious> (best with SSL support).
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
-and/or modify it under the same terms as Perl.
+and/or modify it under the terms of the Artistic License version 2.0.
 
 =cut
